@@ -1,0 +1,79 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
+
+public class RingElection {
+    static ArrayList<Integer> processes = new ArrayList<>();
+    static boolean[] isAlive;
+    
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter the number of processes: ");
+        int numProcesses = sc.nextInt();
+        isAlive = new boolean[numProcesses];
+
+        // Initialize processes and make them alive
+        for (int i = 0; i < numProcesses; i++) {
+            processes.add(i);
+            isAlive[i] = true;
+        }
+
+        System.out.println("Processes in the ring: " + processes);
+
+        while (true) {
+            System.out.println("\n1. Crash a process");
+            System.out.println("2. Start election");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter process ID to crash: ");
+                    int crash = sc.nextInt();
+                    if (crash >= 0 && crash < numProcesses) {
+                        isAlive[crash] = false;
+                        System.out.println("Process " + crash + " crashed.");
+                    }
+                    break;
+
+                case 2:
+                    System.out.print("Enter initiator ID: ");
+                    int initiator = sc.nextInt();
+                    if (initiator >= 0 && initiator < numProcesses && isAlive[initiator]) {
+                        startElection(initiator);
+                    } else {
+                        System.out.println("Invalid initiator.");
+                    }
+                    break;
+
+                case 3:
+                    System.out.println("Exiting...");
+                    sc.close();
+                    System.exit(0);
+
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    static void startElection(int initiator) {
+        System.out.println("Process " + initiator + " starts the election...");
+        
+        ArrayList<Integer> electionList = new ArrayList<>();
+
+        for (int i = 0; i < processes.size(); i++) {
+            if (isAlive[processes.get(i)]) {
+                electionList.add(processes.get(i));
+            }
+        }
+
+        Collections.sort(electionList);
+
+        int leader = electionList.get(electionList.size() - 1);
+        System.out.println("New leader elected: " + leader);
+    }
+}
