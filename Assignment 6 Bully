@@ -1,0 +1,72 @@
+import java.util.Scanner;
+
+public class BullyAlgorithm {
+
+    static int numProcesses;              // Total number of processes
+    static int[] processes;               // Array of process IDs
+    static boolean[] isAlive;             // Status of processes (alive or crashed)
+    static int coordinator;               // ID of the coordinator
+
+    // Start an election from a given process
+    static void startElection(int initiator) {
+        System.out.println("\nProcess " + initiator + " started an election...");
+        boolean higherExists = false;
+
+        for (int i = initiator + 1; i < numProcesses; i++) {
+            if (isAlive[i]) {
+                System.out.println("Process " + initiator + " sends election to " + i);
+                higherExists = true;
+            }
+        }
+
+        // If no higher ID responds, the initiator becomes the coordinator
+        if (!higherExists) {
+            coordinator = initiator;
+            System.out.println("Process " + initiator + " becomes the new coordinator.");
+            announceCoordinator();
+        }
+    }
+
+    // Announce the new coordinator
+    static void announceCoordinator() {
+        System.out.println("\nAnnouncing new coordinator: Process " + coordinator);
+        for (int i = 0; i < numProcesses; i++) {
+            if (i != coordinator && isAlive[i]) {
+                System.out.println("Process " + coordinator + " informs Process " + i);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of processes: ");
+        numProcesses = scanner.nextInt();
+
+        processes = new int[numProcesses];
+        isAlive = new boolean[numProcesses];
+
+        // Initialize processes with IDs
+        for (int i = 0; i < numProcesses; i++) {
+            processes[i] = i;             // IDs are simply 0, 1, 2, ...
+            isAlive[i] = true;            // All processes are initially alive
+        }
+
+        coordinator = numProcesses - 1;    // Set the highest ID as the coordinator initially
+        System.out.println("\nInitial coordinator: Process " + coordinator);
+
+        // Simulate failure and start election
+        System.out.print("\nEnter process ID to crash: ");
+        int crash = scanner.nextInt();
+        isAlive[crash] = false;
+
+        if (crash == coordinator) {
+            System.out.println("Coordinator has crashed!");
+            startElection(0);              // Start election from the lowest ID
+        } else {
+            System.out.println("Process " + crash + " crashed.");
+        }
+
+        scanner.close();
+    }
+}
